@@ -20,6 +20,8 @@ public class ServerApp {
 	private String ip;
 	private Integer port;
 	private String name;
+	private String affects;
+
 
 	private Date downTime;
 

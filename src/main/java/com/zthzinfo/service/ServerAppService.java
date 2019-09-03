@@ -33,8 +33,10 @@ public class ServerAppService {
 			if (ip == null || port == null) {
 				continue;
 			}
+			String affects = ConfigUtil.configs.getStr("affects", "[未说明]");
 
 			ServerApp serverApp = new ServerApp(ip, port, name);
+			serverApp.setAffects(affects);
 
 			apps.add(serverApp);
 			log.info(String.format("%s\t\t%s:%s", name, ip, port+""));
@@ -72,7 +74,7 @@ public class ServerAppService {
 		String formatBetween = DateUtil.formatBetween(between, BetweenFormater.Level.SECOND);
 
 		String title =  String.format("%s%s已恢复服务！本次累计停止服务%s", ConfigUtil.getApplicationName2(), app.getName(), formatBetween);
-		String content = String.format("服务:%s\nIP:%s\n端口:%s\n累计停止时间:%s", app.getName(), app.getIp(), app.getPort(), formatBetween);
+		String content = String.format("服务：%s\nIP：%s\n端口：%s\n累计停止时间：%s\n影响服务：%s", app.getName(), app.getIp(), app.getPort(), formatBetween, app.getAffects());
 
 
 		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
@@ -87,7 +89,7 @@ public class ServerAppService {
 		}
 
 		String title =  String.format("%s%s已停止服务！请注意检查！", ConfigUtil.getApplicationName2(), app.getName());
-		String content = String.format("服务:%s\nIP:%s\n端口:%s", app.getName(), app.getIp(), app.getPort());
+		String content = String.format("服务：%s\nIP：%s\n端口：%s\n影响服务：%s", app.getName(), app.getIp(), app.getPort(), app.getAffects());
 
 
 		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
