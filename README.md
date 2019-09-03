@@ -3,6 +3,7 @@
 
 ## 使用方法
 1. 使用maven package打包后，会生成一个 `server-monitor-xxx-jar-with-dependencies.jar` 文件，重命名成简单一点的文件名（或者从release中直接下载已经打包好的jar包）
+2. 在jar包相同目录下，添加配置文件：`config.conf`，配置说明见下方
 2. 命令：`java -jar xxxx.jar`
 
 
