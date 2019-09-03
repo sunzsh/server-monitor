@@ -33,7 +33,7 @@ public class ServerAppService {
 			if (ip == null || port == null) {
 				continue;
 			}
-			String affects = ConfigUtil.configs.getStr("affects", "[未说明]");
+			String affects = ConfigUtil.configs.getStr("affects", name, "[未说明]");
 
 			ServerApp serverApp = new ServerApp(ip, port, name);
 			serverApp.setAffects(affects);
