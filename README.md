@@ -13,5 +13,32 @@
 3. 配置多个服务，每个服务名必须写在 `[ ]` 中
 4. 每个服务必须包含`ip`和`port`
 5. 每个服务中的affects配置表示当前服务如果停止，将影响的产品或其他服务    
-    
-    
+
+样例：  
+```
+# 应用名将会体现在邮件通知的标题前缀中
+application.name=汇智监控
+
+# mail.to_users可以是多个，用逗号隔开
+mail.to_users=
+
+# 配置邮件服务器
+mail.host=
+mail.port=
+mail.sslEnable=
+mail.from=
+mail.auth=
+mail.user=
+mail.pass=
+
+
+[服务名1]
+ip=
+port=
+affects=
+
+[服务名2]
+ip=
+port=
+affects=
+```
