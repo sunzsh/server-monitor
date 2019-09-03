@@ -24,8 +24,6 @@ public class ServerAppService {
 	public void initApps() {
 		log.info("---------初始化监控对象---------");
 		apps.clear();
-		Set<String> appKeys = new LinkedHashSet<>();
-
 		for (String name : ConfigUtil.configs.getGroups()) {
 			String ip = ConfigUtil.configs.getStr("ip", name, null);
 			Integer port = ConfigUtil.configs.getInt("port", name);
