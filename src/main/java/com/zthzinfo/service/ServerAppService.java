@@ -51,12 +51,12 @@ public class ServerAppService {
 			try {
 				telnetClient.connect(app.getIp(), app.getPort());
 				telnetClient.disconnect();
-				log.info("{}\t\t连接成功 [{}:{}]", app.getName(), app.getIp(), app.getPort());
+				log.info("{}:服务正常 [{}:{}]", app.getName(), app.getIp(), app.getPort());
 				if (app.getDownTime() != null) {
 					huifu(app);
 				}
 			} catch (IOException e) {
-				log.info("{}\t\t连接失败 [{}:{}]", app.getName(), app.getIp(), app.getPort());
+				log.info("{}:服务异常 [{}:{}]", app.getName(), app.getIp(), app.getPort());
 				if (app.getDownTime() == null) {
 					yichang(app);
 				}
