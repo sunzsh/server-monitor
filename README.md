@@ -1,6 +1,10 @@
 # Server-Monitor
 基于telnet的轻量化定时检测公司各服务是否正常运行的java程序，异常/恢复时 系统利用邮件通知
 
+## 判定规则十分简单
+* **服务正常：** telnet能连通
+* **服务异常：** telnet无法连通
+
 ## 使用方法
 1. 使用maven package打包后，会生成一个 `server-monitor-xxx-jar-with-dependencies.jar` 文件，重命名成简单一点的文件名（或者从release中直接下载已经打包好的jar包）
 2. 在jar包相同目录下，添加配置文件：`config.conf`，配置说明见下方
