@@ -32,6 +32,11 @@
 			<artifactId>hutool-log</artifactId>
 			<version>4.6.1</version>
 		</dependency>
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-http</artifactId>
+			<version>4.6.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>javax.mail</groupId>

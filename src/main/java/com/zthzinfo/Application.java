@@ -6,6 +6,7 @@ import com.zthzinfo.service.ServerAppService;
 
 public class Application {
 
+
 	public static void main(String[] args) {
 		LogFactory.setCurrentLogFactory(new ConsoleLogFactory());
 		ServerAppService serverAppService = new ServerAppService();

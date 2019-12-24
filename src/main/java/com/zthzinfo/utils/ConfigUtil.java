@@ -34,4 +34,12 @@ public class ConfigUtil {
 	public static List<String> getUsers() {
 		return CollUtil.newArrayList(configs.getStr("mail.to_users").split("\\s*,\\s*"));
 	}
+	public static List<String> getWebhooks() {
+		String webhooks = configs.getStr("webhooks");
+		if (webhooks == null || webhooks.trim().length() == 0) {
+			return null;
+		}
+
+		return CollUtil.newArrayList(webhooks.split("\\s*,\\s*"));
+	}
 }

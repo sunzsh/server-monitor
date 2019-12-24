@@ -1,6 +1,5 @@
 package com.zthzinfo.utils;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.mail.MailAccount;
 
 import java.util.List;

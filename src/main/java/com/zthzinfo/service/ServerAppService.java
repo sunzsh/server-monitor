@@ -8,6 +8,7 @@ import com.zthzinfo.beans.ServerApp;
 import com.zthzinfo.utils.ConfigUtil;
 import com.zthzinfo.utils.MailUtil;
 import com.zthzinfo.utils.TelnetUtil;
+import com.zthzinfo.utils.WebhookUtil;
 import lombok.Getter;
 import org.apache.commons.net.telnet.TelnetClient;
 
@@ -76,7 +77,9 @@ public class ServerAppService {
 
 
 		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
+
 		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+		WebhookUtil.send(title, content, "online", app);
 
 		app.setDownTime(null);
 	}
@@ -91,7 +94,8 @@ public class ServerAppService {
 
 
 		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
-		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+//		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+		WebhookUtil.send(title, content, "offline", app);
 
 		app.setDownTime(new Date());
 	}
