@@ -72,14 +72,17 @@ public class ServerAppService {
 		long between =  new Date().getTime() - app.getDownTime().getTime();
 		String formatBetween = DateUtil.formatBetween(between, BetweenFormater.Level.SECOND);
 
+		Date timeNow = new Date();
+		String timeNowStr = DateUtil.formatDateTime(timeNow);
+
 		String title =  String.format("%s%s已恢复服务！本次累计停止服务%s", ConfigUtil.getApplicationName2(), app.getName(), formatBetween);
-		String content = String.format("服务：%s\nIP：%s\n端口：%s\n累计停止时间：%s\n影响服务：%s", app.getName(), app.getIp(), app.getPort(), formatBetween, app.getAffects());
+		String content = String.format("时间：%s\n服务：%s\nIP：%s\n端口：%s\n累计停止时间：%s\n影响服务：%s", timeNowStr, app.getName(), app.getIp(), app.getPort(), formatBetween, app.getAffects());
 
 
 		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
 
 		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
-		WebhookUtil.send(title, content, "online", app);
+		WebhookUtil.send(title, content, timeNowStr, "online", app);
 
 		app.setDownTime(null);
 	}
@@ -88,14 +91,16 @@ public class ServerAppService {
 		if (app.getDownTime() != null) {
 			return;
 		}
+		Date timeNow = new Date();
+		String timeNowStr = DateUtil.formatDateTime(timeNow);
 
 		String title =  String.format("%s%s已停止服务！请注意检查！", ConfigUtil.getApplicationName2(), app.getName());
-		String content = String.format("服务：%s\nIP：%s\n端口：%s\n影响服务：%s", app.getName(), app.getIp(), app.getPort(), app.getAffects());
+		String content = String.format("时间：%s\n服务：%s\nIP：%s\n端口：%s\n影响服务：%s", timeNowStr , app.getName(), app.getIp(), app.getPort(), app.getAffects());
 
 
 		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
 //		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
-		WebhookUtil.send(title, content, "offline", app);
+		WebhookUtil.send(title, content, timeNowStr, "offline", app);
 
 		app.setDownTime(new Date());
 	}

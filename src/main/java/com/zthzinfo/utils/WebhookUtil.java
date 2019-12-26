@@ -26,13 +26,14 @@ public class WebhookUtil {
 	private final static String W_AFFECTS = "affects";
 	private final static String W_DOWNTIME = "down_time";
 	private final static String W_STATUS = "status";
+	private final static String W_CURRENTTIME = "current_time";
 
 	private static String replaceParam(String param, String value, String url) throws UnsupportedEncodingException {
 		return url.replaceAll(generateRegex(param), URLEncoder.encode(value, "utf-8"));
 	}
 
 
-	private static void send(String msg, String desc, String status, ServerApp app, String url) {
+	private static void send(String msg, String desc, String timeNow, String status, ServerApp app, String url) {
 		String finalUrl = null;
 		try {
 			finalUrl = replaceParam(W_IP, app.getIp(), url);
@@ -40,6 +41,7 @@ public class WebhookUtil {
 			finalUrl = replaceParam(W_SERVERNAME, app.getName(), finalUrl);
 			finalUrl = replaceParam(W_AFFECTS, app.getAffects(), finalUrl);
 			finalUrl = replaceParam(W_STATUS, status, finalUrl);
+			finalUrl = replaceParam(W_CURRENTTIME, timeNow, finalUrl);
 			if (app.getDownTime() != null) {
 				finalUrl = replaceParam(W_DOWNTIME, DateUtil.formatDateTime(app.getDownTime()), finalUrl);
 			} else {
@@ -66,14 +68,14 @@ public class WebhookUtil {
 	}
 	private static final Log log = LogFactory.get();
 
-	public static void send(String msg, String desc, String status, ServerApp app) {
+	public static void send(String msg, String desc, String timeNow, String status, ServerApp app) {
 		List<String> webhooks = ConfigUtil.getWebhooks();
 		if (webhooks == null) {
 			return;
 		}
 		for (String webhook : webhooks) {
 			webhook = webhook.replaceAll("\\\\n", "\n");
-			send(msg, desc, status, app, webhook);
+			send(msg, desc, timeNow, status, app, webhook);
 		}
 	}
 
