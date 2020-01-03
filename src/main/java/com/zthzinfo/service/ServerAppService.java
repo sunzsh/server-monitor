@@ -79,10 +79,17 @@ public class ServerAppService {
 		String content = String.format("时间：%s\n服务：%s\nIP：%s\n端口：%s\n累计停止时间：%s\n影响服务：%s", timeNowStr, app.getName(), app.getIp(), app.getPort(), formatBetween, app.getAffects());
 
 
-		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
-
-		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
-		WebhookUtil.send(title, content, timeNowStr, "online", app);
+		try {
+			log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
+			MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+		} catch (Exception e) {
+			log.error("发送邮件失败", e);
+		}
+		try {
+			WebhookUtil.send(title, content, timeNowStr, "online", app);
+		} catch (Exception e) {
+			log.error("网络狗子回调失败", e);
+		}
 
 		app.setDownTime(null);
 	}
@@ -98,9 +105,17 @@ public class ServerAppService {
 		String content = String.format("时间：%s\n服务：%s\nIP：%s\n端口：%s\n影响服务：%s", timeNowStr , app.getName(), app.getIp(), app.getPort(), app.getAffects());
 
 
-		log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
-//		MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
-		WebhookUtil.send(title, content, timeNowStr, "offline", app);
+		try {
+			log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
+			MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+		} catch (Exception e) {
+			log.error("发送邮件失败", e);
+		}
+		try {
+			WebhookUtil.send(title, content, timeNowStr, "offline", app);
+		} catch (Exception e) {
+			log.error("网络狗子回调失败", e);
+		}
 
 		app.setDownTime(new Date());
 	}
