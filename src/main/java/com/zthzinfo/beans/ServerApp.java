@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +23,8 @@ public class ServerApp {
 	private Integer port;
 	private String name;
 	private String affects;
+
+	private List<User> users;
 
 
 	private Date downTime;

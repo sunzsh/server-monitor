@@ -2,18 +2,19 @@ package com.zthzinfo.service;
 
 import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.zthzinfo.beans.ServerApp;
-import com.zthzinfo.utils.ConfigUtil;
-import com.zthzinfo.utils.MailUtil;
-import com.zthzinfo.utils.TelnetUtil;
-import com.zthzinfo.utils.WebhookUtil;
+import com.zthzinfo.beans.User;
+import com.zthzinfo.beans.Webhook;
+import com.zthzinfo.utils.*;
 import lombok.Getter;
 import org.apache.commons.net.telnet.TelnetClient;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ServerAppService {
 	private static final Log log = LogFactory.get();
@@ -33,9 +34,28 @@ public class ServerAppService {
 				continue;
 			}
 			String affects = ConfigUtil.configs.getStr("affects", name, "[未说明]");
+			String users = ConfigUtil.configs.getStr("users", name, null);
+			String groups = ConfigUtil.configs.getStr("groups", name, null);
+			Set<User> allUsers = new HashSet<>();
+			if (users != null && users.trim().length() > 0) {
+				String[] usersArr = users.split("\\s*,\\s*");
+				List<User> usersByNames = UserUtil.getUsersByNames(usersArr);
+				allUsers.addAll(usersByNames);
+			}
+
+			if (groups != null && groups.trim().length() > 0) {
+				String[] groupsArr = groups.split("\\s*,\\s*");
+				LinkedHashSet<User> usersByGroups = GroupUtil.getUsersByGroups(groupsArr);
+				allUsers.addAll(usersByGroups);
+			}
+
 
 			ServerApp serverApp = new ServerApp(ip, port, name);
 			serverApp.setAffects(affects);
+
+			if (allUsers.size() > 0) {
+				serverApp.setUsers(new ArrayList<>(allUsers));
+			}
 
 			apps.add(serverApp);
 			log.info(String.format("%s\t\t%s:%s", name, ip, port+""));
@@ -81,14 +101,23 @@ public class ServerAppService {
 
 		try {
 			log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
-			MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+			List<String> userMails = app.getUsers().stream().filter(u -> StrUtil.isNotBlank(u.getMail())).map(User::getMail).collect(Collectors.toList());
+			MailUtil.sendEMail(title, content, userMails, false);
 		} catch (Exception e) {
 			log.error("发送邮件失败", e);
 		}
+
+
 		try {
-			WebhookUtil.send(title, content, timeNowStr, "online", app);
+
+			List<Webhook> webhooks = app.getUsers().stream().map(User::getWebhook).distinct().filter(w -> w != null).collect(Collectors.toList());
+			for (Webhook webhook : webhooks) {
+				List<User> userGroup = app.getUsers().stream().filter(u -> Objects.equals(u.getWebhook(), webhook)).distinct().collect(Collectors.toList());
+				WebhookUtil.send(title, content, timeNowStr, "online", userGroup, webhook, app);
+			}
+
 		} catch (Exception e) {
-			log.error("网络狗子回调失败", e);
+			log.error("网络钩子回调失败", e);
 		}
 
 		app.setDownTime(null);
@@ -107,14 +136,19 @@ public class ServerAppService {
 
 		try {
 			log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
-			MailUtil.sendEMail(title, content, ConfigUtil.getUsers(), false);
+			List<String> userMails = app.getUsers().stream().filter(u -> StrUtil.isNotBlank(u.getMail())).map(User::getMail).collect(Collectors.toList());
+			MailUtil.sendEMail(title, content, userMails, false);
 		} catch (Exception e) {
 			log.error("发送邮件失败", e);
 		}
 		try {
-			WebhookUtil.send(title, content, timeNowStr, "offline", app);
+			List<Webhook> webhooks = app.getUsers().stream().map(User::getWebhook).distinct().filter(w -> w != null).collect(Collectors.toList());
+			for (Webhook webhook : webhooks) {
+				List<User> userGroup = app.getUsers().stream().filter(u -> Objects.equals(u.getWebhook(), webhook)).distinct().collect(Collectors.toList());
+				WebhookUtil.send(title, content, timeNowStr, "offline", userGroup, webhook, app);
+			}
 		} catch (Exception e) {
-			log.error("网络狗子回调失败", e);
+			log.error("网络钩子回调失败", e);
 		}
 
 		app.setDownTime(new Date());

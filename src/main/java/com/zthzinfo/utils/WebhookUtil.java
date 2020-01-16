@@ -6,14 +6,39 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.zthzinfo.beans.ServerApp;
+import com.zthzinfo.beans.User;
+import com.zthzinfo.beans.Webhook;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class WebhookUtil {
+
+	public static Map<String, Webhook> webHooks = new HashMap<>();
+	public static void reloadWebHooks() {
+		webHooks = new HashMap<>();
+		List<String> keys = ConfigUtil.configs.keySet().stream().filter(k -> k.matches("^webhooks\\.[^.]*$")).sorted().collect(Collectors.toList());
+		for (String key : keys) {
+			String[] keyArr = key.split("\\.");
+			String name = keyArr[1];
+			String url = ConfigUtil.configs.get(key);
+			if (url == null || url.trim().length() == 0) {
+				continue;
+			}
+			Webhook webhook = new Webhook(name, url);
+			webHooks.put(name, webhook);
+		}
+	}
+	public static Webhook getWebhookByName(String name) {
+		return webHooks.get(name);
+	}
+
+
 	private WebhookUtil() {}
-	private static String webhooks;
 	private static String generateRegex(String word) {
 		return String.format("\\{\\{\\s*%s\\s*\\}\\}", word.replaceAll("\\_", "\\\\_"));
 	}
@@ -68,15 +93,9 @@ public class WebhookUtil {
 	}
 	private static final Log log = LogFactory.get();
 
-	public static void send(String msg, String desc, String timeNow, String status, ServerApp app) {
-		List<String> webhooks = ConfigUtil.getWebhooks();
-		if (webhooks == null) {
-			return;
-		}
-		for (String webhook : webhooks) {
-			webhook = webhook.replaceAll("\\\\n", "\n");
-			send(msg, desc, timeNow, status, app, webhook);
-		}
+	public static void send(String msg, String desc, String timeNow, String status, List<User> users, Webhook webhook, ServerApp app) {
+		String url = webhook.getUrlWithUsers(users).replaceAll("\\\\n", "\n");
+		send(msg, desc, timeNow, status, app, url);
 	}
 
 
