@@ -23,8 +23,14 @@
 # 应用名将会体现在邮件通知的标题前缀中
 application.name=汇智监控
 
-# mail.to_users可以是多个，用逗号隔开
-mail.to_users=
+users.sunzsh.mail=cn.xiaoshan@gmail.com
+users.sunzsh.webhook=qiyeweixin.sunzsh
+
+users.zhangsan.mail=s.zs@qq.com
+users.zhangsan.webhook=qiyeweixin.zhangsan
+
+groups.admin=sunzsh,zhangsan
+
 
 # 配置邮件服务器
 mail.host=
@@ -36,13 +42,23 @@ mail.user=
 mail.pass=
 
 
-[服务名1]
-ip=
-port=
-affects=
+# http通知
+webhooks.qiyeweixin=http://127.0.0.1:9001/send?touser={{user|}}&content={{msg}}\n{{desc}}\n{{server_name}}\n{{ip}}\n{{port}}\n{{affects}}\n{{down_time}}\n{{status}}\n{{current_time}}
 
-[服务名2]
-ip=
-port=
-affects=
+[测试服务1]
+ip=127.0.0.1
+port=8081
+affects=订单模块
+users=
+groups=admin
+
+[测试服务2]
+ip=127.0.0.1
+port=8080
+affects=支付模块
+users=sunzsh
+groups=
+
+
+
 ```
