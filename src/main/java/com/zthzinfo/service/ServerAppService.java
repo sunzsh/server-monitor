@@ -70,6 +70,7 @@ public class ServerAppService {
 
 			TelnetClient telnetClient = TelnetUtil.getTelnetClient();
 			try {
+				telnetClient.setConnectTimeout(5000);	// 设置连接超时为5s
 				telnetClient.connect(app.getIp(), app.getPort());
 				telnetClient.disconnect();
 				log.info("{}:服务正常 [{}:{}]", app.getName(), app.getIp(), app.getPort());
