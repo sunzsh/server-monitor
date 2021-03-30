@@ -85,7 +85,7 @@ public class ServerAppService {
 					int minute = (int)(new Date().getTime() - app.getDownTime().getTime()) / 1000 / 60;
 					if (minute % 5 == 0 && !Objects.equals(minute, app.getLastNotifyMinutesFromDownTime())) {
 						app.setLastNotifyMinutesFromDownTime(minute);
-						yichang(app);
+						yichangAgain(app, minute);
 					}
 
 				}
