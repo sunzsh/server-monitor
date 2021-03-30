@@ -28,5 +28,6 @@ public class ServerApp {
 
 
 	private Date downTime;
+	private Integer lastNotifyMinutesFromDownTime;
 
 }

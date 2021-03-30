@@ -80,6 +80,13 @@ public class ServerAppService {
 				log.info("{}:服务异常 [{}:{}]", app.getName(), app.getIp(), app.getPort());
 				if (app.getDownTime() == null) {
 					yichang(app);
+				} else {
+					int minute = (int)(new Date().getTime() - app.getDownTime().getTime()) / 1000 / 60;
+					if (minute % 5 == 0 && !Objects.equals(minute, app.getLastNotifyMinutesFromDownTime())) {
+						app.setLastNotifyMinutesFromDownTime(minute);
+						yichang(app);
+					}
+
 				}
 			}
 		}
@@ -98,29 +105,10 @@ public class ServerAppService {
 		String title =  String.format("%s%s已恢复服务！本次累计停止服务%s", ConfigUtil.getApplicationName2(), app.getName(), formatBetween);
 		String content = String.format("时间：%s\n服务：%s\nIP：%s\n端口：%s\n累计停止时间：%s\n影响服务：%s", timeNowStr, app.getName(), app.getIp(), app.getPort(), formatBetween, app.getAffects());
 
-
-		try {
-			log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
-			List<String> userMails = app.getUsers().stream().filter(u -> StrUtil.isNotBlank(u.getMail())).map(User::getMail).collect(Collectors.toList());
-			MailUtil.sendEMail(title, content, userMails, false);
-		} catch (Exception e) {
-			log.error("发送邮件失败", e);
-		}
-
-
-		try {
-
-			List<Webhook> webhooks = app.getUsers().stream().map(User::getWebhook).distinct().filter(w -> w != null).collect(Collectors.toList());
-			for (Webhook webhook : webhooks) {
-				List<User> userGroup = app.getUsers().stream().filter(u -> Objects.equals(u.getWebhook(), webhook)).distinct().collect(Collectors.toList());
-				WebhookUtil.send(title, content, timeNowStr, "online", userGroup, webhook, app);
-			}
-
-		} catch (Exception e) {
-			log.error("网络钩子回调失败", e);
-		}
+		startNotify(app, timeNowStr, title, content, "online");
 
 		app.setDownTime(null);
+		app.setLastNotifyMinutesFromDownTime(null);
 	}
 
 	public void yichang(ServerApp app) {
@@ -134,6 +122,26 @@ public class ServerAppService {
 		String content = String.format("时间：%s\n服务：%s\nIP：%s\n端口：%s\n影响服务：%s", timeNowStr , app.getName(), app.getIp(), app.getPort(), app.getAffects());
 
 
+		startNotify(app, timeNowStr, title, content, "offline");
+
+		app.setDownTime(new Date());
+	}
+
+	public void yichangAgain(ServerApp app, Integer minutes) {
+		if (app.getDownTime() == null) {
+			return;
+		}
+		Date timeNow = new Date();
+		String timeNowStr = DateUtil.formatDateTime(timeNow);
+		String downTimeStr = DateUtil.formatDateTime(app.getDownTime());
+
+		String title =  String.format("%s%s已停止服务超过%s分钟了！请注意检查！", ConfigUtil.getApplicationName2(), app.getName(), minutes+"");
+		String content = String.format("停止时间：%s\n服务：%s\nIP：%s\n端口：%s\n影响服务：%s", downTimeStr , app.getName(), app.getIp(), app.getPort(), app.getAffects());
+
+		startNotify(app, timeNowStr, title, content, "offline");
+	}
+
+	private void startNotify(ServerApp app, String timeNowStr, String title, String content, String online) {
 		try {
 			log.info("发送邮件：\n{}\n{}\n--------------------------", title, content);
 			List<String> userMails = app.getUsers().stream().filter(u -> StrUtil.isNotBlank(u.getMail())).map(User::getMail).collect(Collectors.toList());
@@ -141,17 +149,19 @@ public class ServerAppService {
 		} catch (Exception e) {
 			log.error("发送邮件失败", e);
 		}
+
+
 		try {
+
 			List<Webhook> webhooks = app.getUsers().stream().map(User::getWebhook).distinct().filter(w -> w != null).collect(Collectors.toList());
 			for (Webhook webhook : webhooks) {
 				List<User> userGroup = app.getUsers().stream().filter(u -> Objects.equals(u.getWebhook(), webhook)).distinct().collect(Collectors.toList());
-				WebhookUtil.send(title, content, timeNowStr, "offline", userGroup, webhook, app);
+				WebhookUtil.send(title, content, timeNowStr, online, userGroup, webhook, app);
 			}
+
 		} catch (Exception e) {
 			log.error("网络钩子回调失败", e);
 		}
-
-		app.setDownTime(new Date());
 	}
 
 
